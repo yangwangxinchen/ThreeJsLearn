@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="./three.js"></script>
+    <script src="./Engine.js"></script>
+    <script src="./World.js"></script>
+    <script src="./Merger.js"></script>
+    <script src="./Materials.js"></script>
+
+    <script src="./OrbitControls.js"></script>
+    <script src="./test.js"></script>
+    <script src="./test2.js"></script>
+    <!-- <script type="text/javascript" src="./libs/shaders/SSAOShader.js"></script> -->
+    
+    <script type="text/javascript" src="./libs/postprocessing/EffectComposer.js"></script>
+
+    <script type="text/javascript" src="./libs/postprocessing/TAARenderPass.js"></script>
+    <script type="text/javascript" src="./libs/postprocessing/SSAARenderPass.js"></script>
+
+    <script type="text/javascript" src="./libs/postprocessing/RenderPass.js"></script>
+    <script type="text/javascript" src="./libs/shaders/CopyShader.js"></script>
+    <script type="text/javascript" src="./libs/postprocessing/ShaderPass.js"></script>
+    <script src="./libs/renderers/CSS2DRenderer.js"></script>
+
+    
+    
+
+</head>
+<body>
+    <div id="root">
+        <div id="MakerJS">
+          <canvas id="Maker_Render_Canvas"></canvas>
+        </div>
+      </div>   
+
+      <script> 
+       var Public_Engine = new MakerJS.Engine();
+        Public_Engine.load('mesh/默认视图.world', false, function () {}) 
+        var test=new single.test('xiaoming');
+       // console.log(test.foo())
+    //    console.log(test.age)  //18
+        var two=new  test_var();
+    //     console.log(two.name)
+    //     test.setNum(1)
+        </script>
+</body>
+</html>

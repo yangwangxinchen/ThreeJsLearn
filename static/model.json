@@ -1,0 +1,12 @@
+{
+	"metadata": {
+		"version": 4.5,
+		"type": "Geometry",
+		"generator": "Geometry.toJSON"
+	},
+	"uuid": "90F01EA8-7BAC-4178-B235-FF090B086577",
+	"type": "BoxGeometry",
+	"width": 100,
+	"height": 100,
+	"depth": 100
+}
