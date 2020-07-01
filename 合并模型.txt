@@ -1,0 +1,18 @@
+var geometry = new THREE.Geometry();
+var material = new THREE.MeshLambertMaterial({ color: 0xf33f66 })
+
+var g = new THREE.BoxGeometry(2, 2, 2);
+var m = new THREE.MeshLambertMaterial({ color: 0xffff66 })
+
+var cube2=new THREE.Mesh(g,m);
+cube2.updateMatrix();
+geometry.merge(cube2.geometry,cube2.matrix);
+ 
+var cube3=new THREE.Mesh(g,m);
+cube3.position.x+=3;
+cube3.updateMatrix();//这个用来把合并前的变换矩阵带进geometry保证对象合并后正确的变换
+geometry.merge(cube3.geometry,cube3.matrix);
+
+var cube= new THREE.Mesh(geometry,material);
+cube.position.z-=5;
+scene.add(cube);
