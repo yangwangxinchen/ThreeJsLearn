@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>演示示例</title>
+    <script src="https://cesium.com/downloads/cesiumjs/releases/1.69/Build/Cesium/Cesium.js"></script>
+    <link href="https://cesium.com/downloads/cesiumjs/releases/1.69/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+
+    <style>
+        html,
+        body,
+        #cesiumContainer{
+            width:100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+    <div id="cesiumContainer"></div>
+
+    <script>
+        function startup(Cesium){
+            //这将使您的应用可以访问您在铯离子中的所有资产。
+           Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIyMmQ0M2U0Zi1iOGJmLTQ2OTMtYTA3Ny1lMDkyNmIwZTI2NzYiLCJpZCI6MjcxMTMsInNjb3BlcyI6WyJhc3IiLCJnYyJdLCJpYXQiOjE1ODg5MDY5OTZ9.bUrETUgwnJ1rsOLSJryPUPF8KFDrjS1xaF61-VnqYS4';
+           
+           var viewer = new Cesium.Viewer('cesiumContainer',{
+
+           });
+            //隐藏版权控件
+           viewer._cesiumWidget._creditContainer.style.display = "none";
+   
+        //    var tileset =new Cesium.Cesium3DTileset({
+        //    url : './tileset/bengchang_b3dm/tileset.json',
+        //    maximumScreenSpaceError: 1
+        //    })
+           
+        //    viewer.scene.primitives.add(tileset);
+           //聚焦
+           //    viewer.zoomTo(tileset)
+          // 设置视角
+            // viewer.camera.setView({
+            //     destination : 
+            //     Cesium.Cartesian3.fromDegrees(114.31,30.52,1000),
+            //     // new Cesium.Cartesian3(-2133822.860941442, 5083138.663457238, 3197078.051211627),
+            //     orientation: {
+            //         heading : Cesium.Math.toRadians(0), // east, default value is 0.0 (north)
+            //         pitch : Cesium.Math.toRadians(-90),    // default value (looking down)
+            //         roll : 0.0                             // default value
+            //     }
+            // });
+
+            viewer.camera.flyTo({
+            destination : 
+            // Cesium.Cartesian3.fromDegrees(114.33,30.50,1000),
+            Cesium.Cartesian3.fromDegrees(114.32,30.35,1000),
+            // new Cesium.Cartesian3(-2133659.734566854, 5083175.33996807, 3197053.353951003),
+            orientation : {
+                heading : Cesium.Math.toRadians(0),
+                pitch : Cesium.Math.toRadians(-90),
+                roll : 0.0
+            },
+            duration:3
+            });
+            
+
+            function createInfoUI(){
+                var info_01=viewer.entities.add(labelEntityOptions('info_01','东大水泵站',-2133689.463319364,5083137.968138955,3197040.8708619038))
+                var info_02=viewer.entities.add(labelEntityOptions('info_02','电站',-2133660.4470851636, 5083119.2125633955,3197090.965036156))
+                var info_03=viewer.entities.add(labelEntityOptions('info_03','监测室',-2133698.1094047404, 5083129.639805084,3197044.5429852647))
+                var info_04=viewer.entities.add(labelEntityOptions('info_04','水塘',-2133633.1472472106,  5083146.178615467,3197044.084307948 )) //3197044.084307948
+ 
+                viewer.entities.add({
+                    position:new Cesium.Cartesian3(-2133689.463319364,5083137.968138955,3197040.8708619038),
+                    // point:{
+                    //     pixelSize:20,
+                    //     color:Cesium.Color.RED
+                    // },
+                    polyline:{
+                        positions: [
+                        new Cesium.Cartesian3(-2133633.1472472106,  5083146.178615467,3197044.084307948),
+                        new Cesium.Cartesian3(-2133689.463319364,5083137.968138955,3197040.8708619038),
+                        new Cesium.Cartesian3(-2133698.1094047404, 5083129.639805084,3197044.5429852647)
+                        ],
+                        width:2,
+                        material:Cesium.Color.RED
+                    }
+                })
+
+                // viewer.entities.add({
+                //     position:new Cesium.Cartesian3(-2133689.463319364,5083137.968138955,3197040.8708619038),
+                //     ellipsoid:{
+                //     radii: new Cesium.Cartesian3(0.1, 0.1, 0.1), //设置球体的xyz
+                //     material: Cesium.Color.RED
+                //     }
+                // })
+            }
+             
+            
+            createInfoUI()
+
+             /*label 区域图标显示 */
+             function labelEntityOptions(_entityName,_infotext,_x,_y,_height,_src){
+              var entityVar = {
+                name:_entityName,
+                position: new Cesium.Cartesian3(_x,_y,_height),
+                point : {
+                    pixelSize : 6,
+                    color : Cesium.Color.CYAN,
+                    outlineColor : Cesium.Color.WHITE,
+                    outlineWidth : 2,
+                    disableDepthTestDistance: Number.POSITIVE_INFINITY,  //深度检测关闭
+                    //  distanceDisplayCondition: new Cesium.DistanceDisplayCondition(1, 50), //大于50米 小于1米的地方不显示
+                    //  scaleByDistance: new Cesium.NearFarScalar(50, 1, 120, 0.5),
+                    // heightReference : Cesium.HeightReference.RELATIVE_TO_GROUND //相对于地形的位置
+                    },
+                    label: {
+                    text: _infotext,
+                    font: '14pt Source Han Sans CN', //字体样式
+                    fillColor: Cesium.Color.CYAN, //字体颜色
+                    // backgroundColor: Cesium.Color.BLACK, //背景颜色
+                    showBackground: true, //是否显示背景颜色
+                    style: Cesium.LabelStyle.FILL, //label样式
+                    outlineWidth: 2,
+                    verticalOrigin: Cesium.VerticalOrigin.CENTER, //垂直位置
+                    horizontalOrigin: Cesium.HorizontalOrigin.LEFT, //水平位置
+                    pixelOffset: new Cesium.Cartesian2(-30,-30) //偏移
+                },
+                // billboard:{
+                //     image:_src,
+                //     scale:1,
+                //     show:true,
+                //     scaleByDistance: new Cesium.NearFarScalar(50, 1, 200, 0.5), //根据距离缩放 如果未定义，则使用恒定大小
+                //     // sizeInMeters: true,
+                //     disableDepthTestDistance: Number.POSITIVE_INFINITY,   //深度检测关闭
+                //     // height:400
+                //     pixelOffset: new Cesium.Cartesian2(-4, -60),
+                
+                //     // eyeOffset:    new Cesium.Cartesian3(0,1,0)
+                //     //  distanceDisplayCondition: new Cesium.DistanceDisplayCondition(1, 120.0)
+                // },
+                show:true
+                }
+                return entityVar;
+            }
+
+            // console.log(viewer.scene)
+
+          //鼠标交互事件
+          var handler3D = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
+
+          // 单击输出鼠标位置！！！
+            handler3D.setInputAction(function (lclickment) {
+                //得到当前三维场景
+                var scene = viewer.scene;
+                var ellipsoid=viewer.scene.globe.ellipsoid
+                // var aa=viewer.scene.camera.pickEllipsoid(lclickment.position, ellipsoid)
+               
+                var cartesian = viewer.scene.pickPosition(lclickment.position); //场景坐标
+
+                var bb=ellipsoid.cartesianToCartographic(cartesian)   //aa=bb
+                var lat=Cesium.Math.toDegrees(bb.latitude);
+                var lng=Cesium.Math.toDegrees(bb.longitude);
+                var alt=bb.height;
+                 console.log(cartesian)
+                 console.log('经纬度：'+lng+','+lat+','+alt)
+
+            }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+
+          // 双击输出相机位置 ！！！
+          handler3D.setInputAction(function (movement) {
+                // console.log(movement)    //鼠标位置
+                console.log('相机位置:\n'+viewer.camera.position)
+                var position=viewer.camera.position
+                
+                //笛卡尔转经纬度
+                //得到当前三维场景的椭球体
+                var ellipsoid = viewer.scene.globe.ellipsoid;
+                var cartographic=Cesium.Cartographic.fromCartesian(position,ellipsoid)
+                console.log(cartographic)
+                //经纬度转笛卡尔
+                //Cesium.Cartesian3.fromDegrees()
+            
+                // console.log(viewer.camera.direction)
+                var roll_d= Cesium.Math.toDegrees(viewer.camera.roll)
+                var pitch_d= Cesium.Math.toDegrees(viewer.camera.pitch)
+                var heading_d= Cesium.Math.toDegrees(viewer.camera.heading)
+                //弧度制
+                var heading=viewer.camera.heading
+                var pitch=viewer.camera.pitch
+                var roll=viewer.camera.roll
+                console.log('弧度:'+heading +','+pitch+','+roll)
+                console.log('角度:\n'+'heading:'+ heading_d+',pitch:'+pitch_d+',roll:'+roll_d)
+                //heading : Cesium.Math.toRadians(175.0)  角度转弧度
+
+            }, Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
+
+        }
+
+         
+        if (typeof Cesium !== 'undefined') {
+            window.startupCalled = true;
+            startup(Cesium);
+        }
+
+
+    </script>
+    
+</body>
+</html>

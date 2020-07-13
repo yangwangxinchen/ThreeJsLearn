@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>threejs示例</title>
+    <style>
+        body {
+          margin: 0;
+          overflow: hidden;
+          /* 隐藏body窗口区域滚动条 */
+        }
+    </style>
+
+
+<!--three.js引入-->
+<script src="./js/build/three.js"></script>
+<!-- 控制器 -->
+<script src="./js/controls/OrbitControls.js"></script>
+<script src="./js/controls/Tween.js"></script>
+
+<!-- 性能监测 -->
+<script src="./js/libs/stats.min.js"></script>
+<!-- gui -->
+<script src="./js/libs/dat.gui.min.js"></script>
+
+<script src="./js/loaders/FBXLoader.js"></script>
+<script src="./js/libs/inflate.min.js"></script>
+
+<!-- 后处理依赖文件 -->
+<script src="dependent.js"></script>
+
+</head>
+<body>
+    <div id="ThreeJS" style="position: absolute; left:0px; top:0px"></div>
+    <script>
+        var container,scene,camera,renderer,controls,stats,gui
+        var clock=new THREE.Clock()
+        var step=0
+        var cube,sphere,speeds
+        var pointLight;
+        init()
+        animate()
+
+        //FUNCTIONS
+        function init(){
+
+       //1. SCENE
+        scene = new THREE.Scene();
+        //2. CAMERA
+        var SCREEN_WIDTH = window.innerWidth, SCREEN_HEIGHT = window.innerHeight;
+        camera = new THREE.PerspectiveCamera( 45, SCREEN_WIDTH/SCREEN_HEIGHT, 1, 2000);
+        //设置相机位置
+        camera.position.set(-30,40,30);
+        //设置相机方向(指向的场景对象)
+	      camera.lookAt(scene.position);
+
+        //3. RENDERER
+        renderer = new THREE.WebGLRenderer();
+        //设置渲染区域尺寸
+        renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+        renderer.setClearColor(0xEEEEEE, 1); //设置背景颜色
+        renderer.shadowMapEnabled = true;
+        container = document.getElementById( 'ThreeJS' );
+        //body元素中插入canvas对象
+        container.appendChild( renderer.domElement );
+
+        //4. EVENTS
+        window.addEventListener('resize', resizeWindow);
+        //5. CONTROLS
+        controls=new THREE.OrbitControls( camera, renderer.domElement );
+        //6.LIGHT
+        //点光源
+        // var light = new THREE.PointLight(0xffffff);
+        // light.position.set(0,60,60);
+        // scene.add(light);
+        var spotLight = new THREE.SpotLight(0xffffff);
+        spotLight.position.set(0, 60, 60);
+        spotLight.castShadow = true;
+        scene.add(spotLight);
+        //环境光
+        var ambient = new THREE.AmbientLight(0x0c0c0c);
+        scene.add(ambient);
+
+        //球
+        var sphereGeometry = new THREE.SphereGeometry(4, 20, 20);
+        // var sphereGeometry = new THREE.BoxGeometry(4, 4, 4);
+        var sphereMaterial = new THREE.MeshLambertMaterial({color: 0x7777ff});
+        sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+        sphere.position.set(20,0,2)
+        sphere.castShadow = true;
+        scene.add(sphere);
+
+       }
+
+        //更新窗口
+        function resizeWindow() {
+        const width=window.innerWidth
+        const height=window.innerHeight
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();   //更新投影矩阵
+        // resize viewport width and height
+        renderer.setSize(width,height);  
+       }
+        
+        //animate
+       function animate(){
+  
+        requestAnimationFrame( animate );
+        render();	 
+        update();
+       }
+        
+        //update
+       function update(){
+        controls.update();
+       }
+       
+       //render
+       function render(){
+        //执行渲染操作   指定场景、相机作为参数
+        renderer.render(scene, camera);
+       }
+
+      </script>
+</body>
+</html>

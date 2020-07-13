@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>threejs示例</title>
+    <style>
+        body {
+          margin: 0;
+          overflow: hidden;
+          /* 隐藏body窗口区域滚动条 */
+        }
+    </style>
+
+
+<!--three.js引入-->
+<script src="./js/build/three.js"></script>
+<!-- 控制器 -->
+<script src="./js/controls/OrbitControls.js"></script>
+<script src="./js/controls/Tween.js"></script>
+
+<!-- 性能监测 -->
+<script src="./js/libs/stats.min.js"></script>
+<!-- gui -->
+<script src="./js/libs/dat.gui.min.js"></script>
+
+<script src="./js/loaders/FBXLoader.js"></script>
+<script src="./js/libs/inflate.min.js"></script>
+
+<!-- 后处理依赖文件 -->
+<script src="dependent.js"></script>
+
+</head>
+<body>
+    <div id="ThreeJS" style="position: absolute; left:0px; top:0px"></div>
+    <script>
+        var container,scene,camera,renderer,controls,stats,gui
+        var clock=new THREE.Clock()
+        var step=0
+        var cube,sphere,speeds
+        var pointLight;
+        init()
+        animate()
+
+        //FUNCTIONS
+        function init(){
+
+       //1. SCENE
+        scene = new THREE.Scene();
+        //2. CAMERA
+        var SCREEN_WIDTH = window.innerWidth, SCREEN_HEIGHT = window.innerHeight;
+        camera = new THREE.PerspectiveCamera( 45, SCREEN_WIDTH/SCREEN_HEIGHT, 1, 2000);
+        //设置相机位置
+        camera.position.set(-30,40,30);
+        //设置相机方向(指向的场景对象)
+	      camera.lookAt(scene.position);
+
+        //3. RENDERER
+        renderer = new THREE.WebGLRenderer();
+        //设置渲染区域尺寸
+        renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+        renderer.setClearColor(0xEEEEEE, 1); //设置背景颜色
+        renderer.shadowMapEnabled = true;
+        container = document.getElementById( 'ThreeJS' );
+        //body元素中插入canvas对象
+        container.appendChild( renderer.domElement );
+
+        //4. EVENTS
+        window.addEventListener('resize', resizeWindow);
+        //5. CONTROLS
+        controls=new THREE.OrbitControls( camera, renderer.domElement );
+        //6. STATS
+        stats = new Stats();
+        stats.domElement.style.position = 'absolute';
+        stats.domElement.style.bottom = '0px';
+        stats.domElement.style.zIndex = 100;
+        container.appendChild( stats.domElement );
+        //7.LIGHT
+        //点光源
+        // var light = new THREE.PointLight(0xffffff);
+        // light.position.set(0,60,60);
+        // scene.add(light);
+        var spotLight = new THREE.SpotLight(0xffffff);
+        spotLight.position.set(0, 60, 60);
+        spotLight.castShadow = true;
+        scene.add(spotLight);
+        //环境光
+        var ambient = new THREE.AmbientLight(0x0c0c0c);
+        scene.add(ambient);
+
+        // var directionalLight = new THREE.DirectionalLight( 0xffffff,0.8);
+        // scene.add( directionalLight );
+        
+        // 8. MESH
+        var floorTexture = new THREE.TextureLoader().load( 'images/checkerboard.jpg' );
+        //允许重复映射
+        floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping; 
+        // floorTexture.repeat.set( 10, 10 );
+        //地面
+        // PlaneGeometry(width : Float, height : Float, widthSegments : Integer, heightSegments : Integer)
+        var planeGeometry = new THREE.PlaneGeometry(60, 60, 1, 1);
+        var planeMaterial = new THREE.MeshLambertMaterial({
+            color: 0xffffff,
+            // map:floorTexture
+            });
+        var plane = new THREE.Mesh(planeGeometry, planeMaterial);
+        //接收阴影
+        plane.receiveShadow = true;
+        plane.rotation.x = -0.5 * Math.PI;
+        plane.position.set(15,0,0)
+        scene.add(plane);
+        //方块
+        var cubeGeometry = new THREE.BoxGeometry(4, 4, 4);
+        var cubeMaterial = new THREE.MeshLambertMaterial({color: 0xff0000});
+        cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+        //投射阴影
+        cube.castShadow = true;
+        cube.position.set(-4,3,0)
+        scene.add(cube);
+        
+        //
+        var cube1= new THREE.Mesh(cubeGeometry ,new THREE.MeshLambertMaterial({
+            map:new THREE.TextureLoader().load( 'images/crate.png' )
+        }))
+        cube1.position.set(0,2,-10)
+        scene.add(cube1)
+
+        // cubeGeometry.computeVertexNormals();
+        var cube2= new THREE.Mesh(cubeGeometry ,new THREE.MeshPhongMaterial({
+            bumpMap :new THREE.TextureLoader().load( 'images/stone-bump.jpg'),
+            bumpScale:0.2
+        }))
+        cube2.position.set(10,2,-10)
+        scene.add(cube2)
+
+        var cube3= new THREE.Mesh(cubeGeometry ,new THREE.MeshPhongMaterial({
+            map:new THREE.TextureLoader().load( 'images/checkerboard.jpg' )
+        }))
+        cube3.position.set(20,2,-10)
+        scene.add(cube3)
+
+        var cube4= new THREE.Mesh(cubeGeometry ,new THREE.MeshPhongMaterial({
+        }))
+        cube4.position.set(20,2,10)
+        scene.add(cube4)
+
+        var edgeGeo=new THREE.EdgesGeometry(cube4.geometry)
+        edgeGeo.boundingBox=cube4.geometry.boundingBox
+        var line=new THREE.LineSegments(edgeGeo, new THREE.MeshBasicMaterial({color:0xff0000}));
+        // var line=new THREE.Line(edgeGeo, new THREE.MeshBasicMaterial({color:0xff0000})); //共享点
+        cube4.add(line)
+
+
+        //球
+        var sphereGeometry = new THREE.SphereGeometry(4, 20, 20);
+        var sphereMaterial = new THREE.MeshLambertMaterial({color: 0x7777ff});
+        sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+        sphere.position.set(20,0,2)
+        sphere.castShadow = true;
+        scene.add(sphere);
+
+
+
+        //9. HELPER
+        //辅助坐标
+        var axesHelper = new THREE.AxesHelper(500);
+        scene.add(axesHelper);
+         //辅助网格
+        // var gridHelper = new THREE.GridHelper( 1000, 100);
+        // this.scene.add( gridHelper );
+
+        // console.log(scene)
+        // console.log(scene.children)
+        
+        //10. GUI
+        gui=new dat.GUI()
+
+        speeds=new function () {
+        this.rotationSpeed = 0.02;
+        this.bouncingSpeed = 0.03;
+        };
+        //设置取值范围
+        gui.add(speeds, 'rotationSpeed', 0, 0.5);
+        gui.add(speeds, 'bouncingSpeed', 0, 0.5);
+         //展开gui
+        gui.open();	
+        // initEffect()
+           
+        //11.光球
+        pointLight = new THREE.PointLight( 0x0000ff, 1 );
+		// scene.add( pointLight );
+		// pointLight.add( new THREE.Mesh( new THREE.SphereBufferGeometry( 0.1, 8, 8 ), new THREE.MeshBasicMaterial( { color: 0x0000ff } ) ) );
+
+        //12. TWEEN
+        var tween=new TWEEN.Tween( cube3.position).to( { x: 30 }, 3000 )
+        //无穷
+        tween.repeat( Infinity ).start()
+        // .easing(TWEEN.Easing.easing函数.easing类型)
+        // tween.easing(TWEEN.Easing.Sinusoidal.InOut).start()
+        // tween.start()
+
+        //12. 文字
+        var textGeo
+        var loader_F = new THREE.FontLoader();
+        loader_F.load('fonts/helvetiker_regular.typeface.json',function(font){
+            textGeo = new THREE.TextGeometry("Threejs",  {
+            font: font,
+            size: 80,
+            height: 5,
+            curveSegments: 12,
+            bevelEnabled: true,
+            bevelThickness: 10,
+            bevelSize: 8,
+            bevelSegments: 5
+        })
+        var textMesh=new THREE.Mesh(textGeo, new THREE.MeshPhongMaterial({color:0x0000ff}))
+        textMesh.scale.set(0.1,0.1,0.1)
+        textMesh.position.set(0,10,-20)
+        scene.add(textMesh)
+        })
+        
+       }
+       
+
+        //更新窗口
+        function resizeWindow() {
+        const width=window.innerWidth
+        const height=window.innerHeight
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();   //更新投影矩阵
+        // resize viewport width and height
+        renderer.setSize(width,height);  
+       }
+        
+        //animate
+       function animate(){
+        cube.rotation.x += speeds.rotationSpeed;
+        cube.rotation.y += speeds.rotationSpeed;
+        cube.rotation.z += speeds.rotationSpeed;
+        step += speeds.bouncingSpeed;
+        sphere.position.x = 20 + ( 10 * (Math.cos(step)));
+        sphere.position.y = 2 + ( 10 * Math.abs(Math.sin(step)));
+
+        requestAnimationFrame( animate );
+        stats.begin()
+        render();	
+        stats.end()	
+        update();
+       }
+        
+        //update
+       function update(){
+        controls.update();
+        stats.update();
+        TWEEN.update();
+
+       }
+       
+       //render
+       function render(){
+ 
+        //手动清除颜色、深度,模板缓存.
+        renderer.clear();
+        //获得前后两次执行该方法的时间间隔
+        var delta=clock.getDelta()       
+        var timer = 0.0001 * Date.now();
+        if ( mixer ) mixer.update( delta );
+
+        pointLight.position.x = Math.sin( timer * 7 ) * 30;
+		pointLight.position.y = Math.cos( timer * 5 ) * 40;
+		pointLight.position.z = Math.cos( timer * 3 ) * 30;
+
+        //执行渲染操作   指定场景、相机作为参数
+        renderer.render(scene, camera);
+
+        // composer.render( delta);
+       }
+
+      //加载 model
+      var mixer
+      var loader = new THREE.FBXLoader();
+      
+		loader.load( 'model/Samba Dancing.fbx', function ( object ) {
+
+		mixer = new THREE.AnimationMixer( object );
+
+		var action = mixer.clipAction( object.animations[ 0 ] );
+		action.play();
+
+		object.traverse( function ( child ) {
+
+		if ( child.isMesh ) {
+
+			child.castShadow = true;
+			child.receiveShadow = true;
+
+			}
+
+		} );
+
+            object.scale.set(0.1,0.1,0.1)
+            ////////////
+            //添加模型//
+            ///////////           
+			// scene.add( object );
+
+		} );
+
+
+       //后处理  通道
+       var composer
+       function initEffect(){
+
+        renderer.autoClear = false;
+        // 初始化renderPass
+        var renderScene = new THREE.RenderPass(scene, camera);
+        // renderScene.enabled = false
+        // 初始化bloomPass 
+        var bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight),1.5,0.4,0.85);
+        // 一些参数 可以调整看效果
+        bloomPass.threshold = 0.36;
+        bloomPass.strength = 0.6;
+        bloomPass.radius = 0;
+        
+        // effectCopy
+        var effectCopy = new THREE.ShaderPass(THREE.CopyShader);
+        // 让effectCopy渲染到屏幕上 没这句不会再屏幕上渲染
+        // effectCopy.renderToScreen = true;
+
+        // effectCopy
+        var effectCopy = new THREE.ShaderPass(THREE.CopyShader);
+        // // 让effectCopy渲染到屏幕上 没这句不会再屏幕上渲染
+        effectCopy.renderToScreen = true;
+        // 初始化 composer
+        composer = new THREE.EffectComposer(renderer);
+        composer.renderTarget1.stencilBuffer = true;
+        composer.renderTarget2.stencilBuffer = true;
+
+        var taaRenderPass = new THREE.TAARenderPass(scene,camera);
+        taaRenderPass.unbiased = false;
+        taaRenderPass.enabled = true;
+       
+        composer.setSize(window.innerWidth, window.innerHeight);
+        composer.addPass(renderScene);
+        // composer.addPass(taaRenderPass);
+        composer.addPass(bloomPass);
+        composer.addPass(effectCopy);
+    }
+
+
+
+      </script>
+
+    
+</body>
+</html>
